@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.httr-oauth
+*spoty_auth.R
+.Rproj.user
+/_archive/*
+/data/*
