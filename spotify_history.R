@@ -7,8 +7,11 @@
 # Basic functions and packages
 suppressPackageStartupMessages(suppressWarnings({
   library(spotifyr)
-  library(tidyverse)
+  library(dplyr)
   library(here)
+  library(readr)
+  library(httpuv)
+  library(lubridate)
 }))
 
 path <- paste0(here(), "/") # "D:/Rstuff/spotify_stuff/"
@@ -18,6 +21,7 @@ path <- paste0(here(), "/") # "D:/Rstuff/spotify_stuff/"
 # Sys.setenv(SPOTIFY_CLIENT_ID = 'xxx')
 # Sys.setenv(SPOTIFY_CLIENT_SECRET = 'yyy')
 source(paste0(path, "spoty_auth.R"))
+access_token <- get_spotify_access_token()
 
 # load full history
 # my_alltime <- readr::read_csv2(paste0(path, "data/spotify_alltime.csv"))
@@ -29,7 +33,18 @@ if (file.exists(rds_file)) {
 # get last 50 songs
 my_recent_pl <- spotifyr::get_my_recently_played(limit = 50)
 
+my_recent_pl$artist_name <- sapply(1:nrow(my_recent_pl), function(x) paste0(my_recent_pl$track.artists[[x]]$name, collapse = ", "))
+
 my_recent_pl <- my_recent_pl %>% 
+  dplyr::mutate(
+    played_at_utc = lubridate::as_datetime(played_at)
+  ) %>% 
+  dplyr::rename(
+    track_name = track.name,
+    artist_name = artist_name,
+    album_name = track.album.name,
+    track_uri = track.uri
+  ) %>% 
   dplyr::select(track_name, 
                 artist_name, 
                 album_name, 
